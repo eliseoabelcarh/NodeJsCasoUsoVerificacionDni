@@ -21,11 +21,11 @@ async function crearVerificadorDeIdentidad(daoUsuarios, lectorDni, emailSender) 
             const apellidosCoinciden = await compararStrings(infoUser.apellidos, apellidos)
             if (nombresCoinciden && apellidosCoinciden) {
                 const mail = {
-                    //from: emailSender.getEmailSender,//opcional toma por defecto el de credenciales
+                    //from: emailSender.getEmailSender,//opcional ya no se necesita
                     to: infoUser.email,
                     subject: `Hola ${infoUser.nombres}, tu Dni ha sido veriicado!!`,
                     text: 'Nombres coinciden con la foto de tu Dni!',
-                    attachmentsPaths: [imagenDniFrontal]//TODO agregar watermark
+                    attachments: [imagenDniFrontal]//TODO agregar watermark
                 }
                 const recibido = await emailSender.sendEmail(mail)
                 console.log('enviado:' + recibido)
