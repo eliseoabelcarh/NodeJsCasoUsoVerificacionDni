@@ -2,7 +2,7 @@
 const assert = require('assert')
 const { crearDaoUsuarios } = require('../../src/dao/daoFactory')
 const { crearVerificadorDeIdentidad } = require('../../src/shared/verificadorDeIdentidad')
-const { createTextFromImageReader } = require('../../modulosDeGrupo/lectorTextoDesdeImagen/src/shared/textFromImageReader')
+const { createTextFromImageReader } = require('../../modulosDeGrupo/NodeJsReadTextFromImageModule/src/shared/textFromImageReader')
 const { crearEmailSender } = require('../../modulosDeGrupo/NodeJsEmailSenderModule/index')
 require('dotenv').config()
 
