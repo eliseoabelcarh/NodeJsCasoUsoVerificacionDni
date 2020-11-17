@@ -10,17 +10,7 @@ async function getNombresYApellidosDeData(text) {
     return { apellidos, nombres }
 }
 
-async function compararStrings(a, b) {
-
-    let data1 = a.toUpperCase()
-    let data2 = b.toUpperCase()
-    console.log('DATO1 : ', data1)
-    console.log('DATO2 : ', data2)
-
-    return data1 === data2
-}
 
 module.exports = {
-    getNombresYApellidosDeData,
-    compararStrings
+    getNombresYApellidosDeData
 }

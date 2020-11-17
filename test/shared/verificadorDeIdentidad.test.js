@@ -8,75 +8,82 @@ require('dotenv').config()
 
 
 
-let daoUsuarios
-const config = {
-    user: process.env.GMAIL_FOR_NODEMAILER_USER,
-    pass: process.env.GMAIL_PASSWORD_FOR_NODEMAILER,
-    service: 'nodemailer'
-}
 
-before(async () => {
-    daoUsuarios = await crearDaoUsuarios('memoria')
+describe.only(' TEST PARA FUNCTION CREAR-VERIFICADOR-DE-IDENTIDAD()', async () => {
 
 
-})
+    let daoUsuarios
+    let emailSender
+    let lectorDni
+    let verificador
 
-afterEach(async () => {
-    await daoUsuarios.cleanAll()
-})
+    const config = {
+        user: process.env.GMAIL_FOR_NODEMAILER_USER,
+        pass: process.env.GMAIL_PASSWORD_FOR_NODEMAILER,
+        service: 'nodemailer'
+    }
 
 
-describe('envío userId que no existe', async () => {
+    const usuario1 = {
+        nombres: 'JAMIE FALKLAND',
+        apellidos: 'ANDERSON',
+        email: 'eliseoabelcarh1@gmail.com',
+        pathDniFront: './test/assets/ejemploDni2.jpg'
+    }
+    const usuario2 = {
+        nombres: 'FRANCISCA',
+        apellidos: 'GORZETTI',
+        email: 'eliseoabelcarh1@gmail.com',
+        pathDniFront: './test/assets/ejemploDni4.jpg'
+    }
 
-    const idQueNoExiste = 'mxk'
+    before(async () => {
+        daoUsuarios = await crearDaoUsuarios('memoria')
+        emailSender = await crearEmailSender(config)
+        lectorDni = await createTextFromImageReader()
+        verificador = await crearVerificadorDeIdentidad(daoUsuarios, lectorDni, emailSender)
+    })
 
-    it('lanza error', async () => {
-        await assert.rejects(async () => {
+    afterEach(async () => {
+        await daoUsuarios.cleanAll()
+    })
 
-            const emailSender = await crearEmailSender(config)
-            const lectorDni = await createTextFromImageReader()
-            const verificador = await crearVerificadorDeIdentidad(daoUsuarios, lectorDni, emailSender)
-            await verificador.validarInfoEnDbConFotoDni({ userId: idQueNoExiste })
-        }, (error) => {
-            const recurso = 'usuario'
-            const esperado = `no se encontró '${recurso}' con id: ${idQueNoExiste}`
-            assert.deepStrictEqual(esperado, error.message)
-            return true
+
+    describe('envío userId que no existe', async () => {
+
+        const idQueNoExiste = 'mxk'
+
+        it('lanza error', async () => {
+            await assert.rejects(async () => {
+                await verificador.validarInfoEnDbConFotoDni({ userId: idQueNoExiste })
+            }, (error) => {
+                const recurso = 'usuario'
+                const esperado = `no se encontró '${recurso}' con id: ${idQueNoExiste}`
+                assert.deepStrictEqual(esperado, error.message)
+                return true
+            })
         })
     })
-})
 
 
 
-describe('valido nombres y apellidos con foto del dni', async () => {
-    it('devuelve true si coinciden', async () => {
-        const emailSender = await crearEmailSender(config)
-        const lectorDni = await createTextFromImageReader()
-        const verificador = await crearVerificadorDeIdentidad(daoUsuarios, lectorDni, emailSender)
-        const nombres = 'JAMIE FALKLAND'
-        const apellidos = 'ANDERSON'
-        const email = 'eliseoabelcarh1@gmail.com'
-        const usuario = await daoUsuarios.addUser({ nombres, apellidos, email })
-        const userId = usuario.id
-        const pathFotoDni = './test/assets/ejemploDni2.jpg'
-        const respuesta = await verificador.validarInfoEnDbConFotoDni({ userId, imagenDniFrontal: pathFotoDni })
-        assert.deepStrictEqual(respuesta, true)
+
+    describe('valido usuario1 con foto del dni', async () => {
+        it('devuelve true si coinciden', async () => {
+            const usuario = await daoUsuarios.addUser(usuario1)
+            const userId = usuario.id
+            const respuesta = await verificador.validarInfoEnDbConFotoDni({ userId })
+            assert.deepStrictEqual(respuesta, true)
+        })
     })
-})
 
 
-describe('valido nombres y apellidos con foto del dni', async () => {
-    it('devuelve true si coinciden', async () => {
-        const emailSender = await crearEmailSender(config)
-        const lectorDni = await createTextFromImageReader()
-        const verificador = await crearVerificadorDeIdentidad(daoUsuarios, lectorDni, emailSender)
-        const nombres = 'FRANCISCA'
-        const apellidos = 'GORZETTI'
-        const email = 'eliseoabelcarh1@gmail.com'
-        const usuario = await daoUsuarios.addUser({ nombres, apellidos, email })
-        const userId = usuario.id
-        const pathFotoDni = './test/assets/ejemploDni4.jpg'
-        const respuesta = await verificador.validarInfoEnDbConFotoDni({ userId, imagenDniFrontal: pathFotoDni })
-        assert.deepStrictEqual(respuesta, true)
+    describe('valido usuario2 con foto del dni', async () => {
+        it('devuelve true si coinciden', async () => {
+            const usuario = await daoUsuarios.addUser(usuario2)
+            const userId = usuario.id
+            const respuesta = await verificador.validarInfoEnDbConFotoDni({ userId })
+            assert.deepStrictEqual(respuesta, true)
+        })
     })
 })

@@ -18,9 +18,15 @@ function crearErrorRecursoNoEncontrado(recurso, id) {
     error.type = 'NOT_FOUND'
     return error
 }
+function crearErrorCampoNoEncontrado(campo, id) {
+    const errMsg = `no se encontró '${campo}' en usuario con id: ${id}`
+    const error = new Error(errMsg)
+    error.type = 'NOT_FOUND'
+    return error
+}
 
 module.exports = {
     /*  crearErrorDeBaseDeDatos, */
     crearErrorArgumentosInvalidos,
-    crearErrorRecursoNoEncontrado
+    crearErrorRecursoNoEncontrado, crearErrorCampoNoEncontrado
 }

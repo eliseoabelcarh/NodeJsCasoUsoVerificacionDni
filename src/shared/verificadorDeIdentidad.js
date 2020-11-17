@@ -1,36 +1,29 @@
-const { compararStrings } = require('../../src/shared/functions')
-
+const { tieneNombre, getPathDniFrontFromUser, prepararEmailDeDniVerificado } = require('../models/usuario')
 
 async function crearVerificadorDeIdentidad(daoUsuarios, lectorDni, emailSender) {
 
 
     async function getNombresApellidosDeFotoDni(pathImagenDniFrontal) {
-        const text = await lectorDni.readTextFromImage(pathImagenDniFrontal)
-        const { apellidos, nombres } = await lectorDni.getNombresYApellidosDeData(text)
+        let text = await lectorDni.readTextFromImage(pathImagenDniFrontal)
+        let { apellidos, nombres } = await lectorDni.getNombresYApellidosDeData(text)
         return { apellidos, nombres }
     }
 
 
     return {
 
-        validarInfoEnDbConFotoDni: async ({ userId, imagenDniFrontal }) => {
+        validarInfoEnDbConFotoDni: async ({ userId }) => {
 
-            const infoUser = await daoUsuarios.getUserById(userId)
-            const { apellidos, nombres } = await getNombresApellidosDeFotoDni(imagenDniFrontal)
-            const nombresCoinciden = await compararStrings(infoUser.nombres, nombres)
-            const apellidosCoinciden = await compararStrings(infoUser.apellidos, apellidos)
-            if (nombresCoinciden && apellidosCoinciden) {
-                const mail = {
-                    //from: emailSender.getEmailSender,//opcional ya no se necesita
-                    to: infoUser.email,
-                    subject: `Hola ${infoUser.nombres}, tu Dni ha sido veriicado!!`,
-                    text: 'Nombres coinciden con la foto de tu Dni!',
-                    attachments: [imagenDniFrontal]//TODO agregar watermark
-                }
-                const recibido = await emailSender.sendEmail(mail)
-                console.log('enviado:' + recibido)
+            let usuario = await daoUsuarios.getUserById(userId)
+            let pathDniFront = getPathDniFrontFromUser(usuario)
+            let { apellidos, nombres } = await getNombresApellidosDeFotoDni(pathDniFront)
+            let nombresCoinciden = tieneNombre(usuario, { nombres, apellidos })
+            if (nombresCoinciden) {
+                let mail = prepararEmailDeDniVerificado(usuario)
+                await emailSender.sendEmail(mail)
+                return true
             }
-            return nombresCoinciden && apellidosCoinciden
+            return false
         }
 
 

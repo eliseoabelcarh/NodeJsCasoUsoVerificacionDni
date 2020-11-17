@@ -4,35 +4,27 @@ const fs = require('fs')
 const { getNombresYApellidosDeData } = require('../shared/functions')
 
 const createTextFromImageReader = async () => {
-    const worker = createWorker({
+    const logger = {
         logger: m => {
             let num = m.progress
             num = Number.parseFloat(num * 100).toFixed(2)
             console.log(num + '%')
         },
-    });
+    }
 
     return {
         readTextFromImage: async (pathImage) => {
             try {
 
+                const worker = createWorker(logger)
                 if (!fs.existsSync(pathImage)) {
                     throw new Error('no existe ruta o archivo')
                 }
-                let nombres = ''
-                let apellidos = ''
-
                 await worker.load();
                 await worker.loadLanguage('eng');
                 await worker.initialize('eng');
-
                 const { data: { text } } = await worker.recognize(pathImage);
-                /* const data = stringCut(text)
-                apellidos = data[4]
-                nombres = data[6] */
-                await worker.terminate();
-                //return { apellidos, nombres }
-                return text
+                await worker.terminate(); return text
 
             } catch (error) {
                 throw handleError(error)
@@ -54,14 +46,6 @@ function handleError(error) {
         return new Error('algo salió mal')
     }
 }
-/* 
-function stringCut(str) {
-    var nstr = str.split(/\n/);
-    return nstr.slice(0, 10);
-}
- */
-
-
 
 module.exports = {
     createTextFromImageReader

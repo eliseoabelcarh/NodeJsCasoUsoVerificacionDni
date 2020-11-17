@@ -1,4 +1,4 @@
-const { crearErrorRecursoNoEncontrado } = require('../errors/apiError')
+const { crearErrorRecursoNoEncontrado, crearErrorCampoNoEncontrado } = require('../errors/apiError')
 const { crearModeloUsuario } = require('../models/usuario')
 
 async function crearDaoUsuariosMemoria() {
